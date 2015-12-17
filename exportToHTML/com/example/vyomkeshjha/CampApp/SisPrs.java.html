@@ -1,0 +1,190 @@
+<html>
+<head>
+<title>SisPrs.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(204,120,50); }
+.s1 { color: rgb(169,183,198); }
+.s2 { color: rgb(128,128,128); }
+.s3 { color: rgb(106,135,89); }
+</style>
+</head>
+<BODY BGCOLOR="#2b2b2b">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+SisPrs.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<span class="s0">package </span><span class="s1">com.example.vyomkeshjha.CampApp</span><span class="s0">;</span><span class="s1"> 
+ 
+ 
+        </span><span class="s0">import </span><span class="s1">java.io.IOException</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">java.io.InputStream</span><span class="s0">;</span><span class="s1"> 
+ 
+        </span><span class="s0">import </span><span class="s1">org.jsoup.Jsoup</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">org.jsoup.nodes.Document</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">org.jsoup.select.Elements</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">org.jsoup.Connection</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.os.AsyncTask</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.os.Bundle</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.util.Log</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.app.Activity</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.app.ProgressDialog</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.graphics.Bitmap</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.graphics.BitmapFactory</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.view.View</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.view.View.OnClickListener</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.widget.Button</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.widget.ImageView</span><span class="s0">;</span><span class="s1"> 
+        </span><span class="s0">import </span><span class="s1">android.widget.TextView</span><span class="s0">;</span><span class="s1"> 
+ 
+        </span><span class="s0">import </span><span class="s1">com.example.vyomkeshjha.CampAppX.R</span><span class="s0">;</span><span class="s1"> 
+ 
+</span><span class="s0">public class </span><span class="s1">SisPrs </span><span class="s0">extends </span><span class="s1">Activity { 
+ 
+    </span><span class="s2">// URL Address</span><span class="s1"> 
+ 
+    ProgressDialog mProgressDialog</span><span class="s0">;</span><span class="s1"> 
+    String Desc</span><span class="s0">;</span><span class="s1"> 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onCreate(Bundle savedInstanceState) { 
+        </span><span class="s0">super</span><span class="s1">.onCreate(savedInstanceState)</span><span class="s0">;</span><span class="s1"> 
+        setContentView(R.layout.activity_main)</span><span class="s0">;</span><span class="s1"> 
+ 
+        </span><span class="s2">// Locate the Buttons in activity_main.xml</span><span class="s1"> 
+ 
+        Button descbutton = (Button) findViewById(R.id.descbutton)</span><span class="s0">;</span><span class="s1"> 
+        Button wp2 = (Button) findViewById(R.id.WpBu)</span><span class="s0">;</span><span class="s1"> 
+ 
+        wp2.setOnClickListener(</span><span class="s0">new </span><span class="s1">OnClickListener() { 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onClick(View v) { 
+                Log.e(</span><span class="s3">&quot;start&quot;</span><span class="s0">,</span><span class="s3">&quot;getWPEXECbeg&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            </span><span class="s0">new </span><span class="s1">GetWp().execute()</span><span class="s0">;</span><span class="s1"> 
+                Log.e(</span><span class="s3">&quot;start&quot;</span><span class="s0">,</span><span class="s3">&quot;getWPEXECend&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            } 
+        })</span><span class="s0">;</span><span class="s1"> 
+ 
+        </span><span class="s2">// Capture button click</span><span class="s1"> 
+        descbutton.setOnClickListener(</span><span class="s0">new </span><span class="s1">OnClickListener() { 
+            </span><span class="s0">public void </span><span class="s1">onClick(View arg0) { 
+                </span><span class="s2">// Execute Description AsyncTask</span><span class="s1"> 
+                </span><span class="s0">new </span><span class="s1">Description().execute()</span><span class="s0">;</span><span class="s1"> 
+            } 
+        })</span><span class="s0">;</span><span class="s1"> 
+ 
+    } 
+ 
+    </span><span class="s2">// Description AsyncTask</span><span class="s1"> 
+    </span><span class="s0">private class </span><span class="s1">Description </span><span class="s0">extends </span><span class="s1">AsyncTask&lt;Void</span><span class="s0">, </span><span class="s1">Void</span><span class="s0">, </span><span class="s1">Void&gt; { 
+        String desc</span><span class="s0">;</span><span class="s1"> 
+        String Cookie</span><span class="s0">;</span><span class="s1"> 
+        @Override 
+        </span><span class="s0">protected void </span><span class="s1">onPreExecute() { 
+            </span><span class="s0">super</span><span class="s1">.onPreExecute()</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialog = </span><span class="s0">new </span><span class="s1">ProgressDialog(SisPrs.</span><span class="s0">this</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialog.setTitle(</span><span class="s3">&quot;connector&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialog.setMessage(</span><span class="s3">&quot;Loading...&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialog.setIndeterminate(</span><span class="s0">false</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialog.show()</span><span class="s0">;</span><span class="s1"> 
+        } 
+ 
+        @Override 
+        </span><span class="s0">protected </span><span class="s1">Void doInBackground(Void... params) { 
+            </span><span class="s0">try </span><span class="s1">{ 
+                </span><span class="s2">// Connect to the web site</span><span class="s1"> 
+              </span><span class="s0">try </span><span class="s1">{ 
+                  Connection.Response res = Jsoup.connect(</span><span class="s3">&quot;http://websismit.manipal.edu/websis/control/createAnonSession&quot;</span><span class="s1">) 
+                          .data(</span><span class="s3">&quot;idValue&quot;</span><span class="s0">, </span><span class="s3">&quot;150906009&quot;</span><span class="s1">) 
+                          .data(</span><span class="s3">&quot;birthDate_i18n&quot;</span><span class="s0">, </span><span class="s3">&quot;1998-12-15&quot;</span><span class="s1">).data(</span><span class="s3">&quot;birthDate&quot;</span><span class="s0">, </span><span class="s3">&quot;1998-12-15&quot;</span><span class="s1">) 
+                          .method(Connection.Method.POST) 
+                  .execute()</span><span class="s0">;</span><span class="s1"> 
+                  Log.v(</span><span class="s3">&quot;done&quot;</span><span class="s0">,</span><span class="s3">&quot;connection made&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+                  Document SieP = res.parse()</span><span class="s0">;</span><span class="s1"> 
+                  Cookie = res.cookie(</span><span class="s3">&quot;JSESSIONID&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+                  Log.d(</span><span class="s3">&quot;cookie&quot;</span><span class="s0">,</span><span class="s3">&quot;cookie is :&quot;</span><span class="s1">+Cookie)</span><span class="s0">;</span><span class="s1"> 
+ 
+              } 
+              </span><span class="s0">catch </span><span class="s1">(Exception e) 
+              { 
+                  Log.e(</span><span class="s3">&quot;error&quot;</span><span class="s0">,</span><span class="s3">&quot;   WebsisConnectFailed&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+                  e.printStackTrace()</span><span class="s0">;</span><span class="s1"> 
+              } 
+ 
+                Document sis = Jsoup.connect(</span><span class="s3">&quot;http://websismit.manipal.edu/websis/control/createAnonSession&quot;</span><span class="s1">).data(</span><span class="s3">&quot;cookieexists&quot;</span><span class="s0">, </span><span class="s3">&quot;false&quot;</span><span class="s1">) 
+                        .data(</span><span class="s3">&quot;idValue&quot;</span><span class="s0">, </span><span class="s3">&quot;150906009&quot;</span><span class="s1">) 
+                        .data(</span><span class="s3">&quot;birthDate_i18n&quot;</span><span class="s0">, </span><span class="s3">&quot;1998-12-15&quot;</span><span class="s1">).data(</span><span class="s3">&quot;birthDate&quot;</span><span class="s0">,</span><span class="s3">&quot;1998-12-15&quot;</span><span class="s1">) 
+                        .post()</span><span class="s0">;</span><span class="s1"> 
+                Log.i(</span><span class="s3">&quot;data&quot;</span><span class="s0">,</span><span class="s1">sis.title()+</span><span class="s3">&quot;logged&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+                Log.i(</span><span class="s3">&quot;data&quot;</span><span class="s0">,</span><span class="s1">sis.body()+</span><span class="s3">&quot;logged&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+                Log.i(</span><span class="s3">&quot;data&quot;</span><span class="s0">,</span><span class="s1">sis.toString()+</span><span class="s3">&quot;logged&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+                Document Details = Jsoup.connect(</span><span class="s3">&quot;http://websismit.manipal.edu/websis/control/StudentAcademicProfile&quot;</span><span class="s1">).get()</span><span class="s0">;</span><span class="s1"> 
+                </span><span class="s2">// Using Elements to get the Meta data</span><span class="s1"> 
+               </span><span class="s2">// Log.d(&quot;details&quot;,Details.body().toString());</span><span class="s1"> 
+                Desc = Cookie</span><span class="s0">;</span><span class="s1"> 
+            } </span><span class="s0">catch </span><span class="s1">(IOException e) { 
+                e.printStackTrace()</span><span class="s0">;</span><span class="s1"> 
+            } 
+            </span><span class="s0">return null;</span><span class="s1"> 
+        } 
+ 
+        @Override 
+        </span><span class="s0">protected void </span><span class="s1">onPostExecute(Void result) { 
+            </span><span class="s2">// Set description into TextView</span><span class="s1"> 
+            TextView txtdesc = (TextView) findViewById(R.id.desctxt)</span><span class="s0">;</span><span class="s1"> 
+            txtdesc.setText(Desc)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialog.dismiss()</span><span class="s0">;</span><span class="s1"> 
+        } 
+    } 
+ 
+    </span><span class="s2">// WbPageGetter AsyncTask</span><span class="s1"> 
+    </span><span class="s0">private class </span><span class="s1">GetWp </span><span class="s0">extends </span><span class="s1">AsyncTask&lt;Void</span><span class="s0">, </span><span class="s1">Void</span><span class="s0">, </span><span class="s1">Void&gt; { 
+        String desc</span><span class="s0">;</span><span class="s1"> 
+        ProgressDialog mProgressDialogX</span><span class="s0">;</span><span class="s1"> 
+        @Override 
+        </span><span class="s0">protected void </span><span class="s1">onPreExecute() { 
+            </span><span class="s0">super</span><span class="s1">.onPreExecute()</span><span class="s0">;</span><span class="s1"> 
+ 
+            mProgressDialogX = </span><span class="s0">new </span><span class="s1">ProgressDialog(SisPrs.</span><span class="s0">this</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialogX.setTitle(</span><span class="s3">&quot;connection&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialogX.setMessage(</span><span class="s3">&quot;Loading...&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialogX.setIndeterminate(</span><span class="s0">false</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+            mProgressDialogX.show()</span><span class="s0">;</span><span class="s1"> 
+        } 
+ 
+        @Override 
+        </span><span class="s0">protected </span><span class="s1">Void doInBackground(Void... params) { 
+ 
+                </span><span class="s2">// Connect to the web site</span><span class="s1"> 
+                </span><span class="s0">try </span><span class="s1">{ 
+                    Log.e(</span><span class="s3">&quot;COOK&quot;</span><span class="s0">,</span><span class="s3">&quot;the cookie is &quot;</span><span class="s1">+Desc)</span><span class="s0">;</span><span class="s1"> 
+                    Document Details = Jsoup.connect(</span><span class="s3">&quot;http://websismit.manipal.edu/websis/control/StudentAcademicProfile&quot;</span><span class="s1">).cookie(</span><span class="s3">&quot;JSESSIONID&quot;</span><span class="s0">,</span><span class="s1">desc).get()</span><span class="s0">;</span><span class="s1"> 
+                    </span><span class="s2">// Using Elements to get the Meta data</span><span class="s1"> 
+                    </span><span class="s2">// Log.d(&quot;details&quot;,Details.body().toString());</span><span class="s1"> 
+                    Log.d(</span><span class="s3">&quot;AcademicProfile&quot;</span><span class="s0">,</span><span class="s1">Details.toString())</span><span class="s0">;</span><span class="s1"> 
+                } 
+                </span><span class="s0">catch </span><span class="s1">(Exception e) 
+                { 
+                    Log.e(</span><span class="s3">&quot;error&quot;</span><span class="s0">,</span><span class="s3">&quot;   LooksLikeNullCook&quot;</span><span class="s1">)</span><span class="s0">;</span><span class="s1"> 
+                    e.printStackTrace()</span><span class="s0">;</span><span class="s1"> 
+                } 
+ 
+ 
+ 
+ 
+            </span><span class="s0">return null;</span><span class="s1"> 
+        } 
+ 
+        @Override 
+        </span><span class="s0">protected void </span><span class="s1">onPostExecute(Void result) { 
+            </span><span class="s2">// Set description into TextView</span><span class="s1"> 
+ 
+            mProgressDialogX.dismiss()</span><span class="s0">;</span><span class="s1"> 
+        } 
+    } 
+}</span></pre>
+</body>
+</html>

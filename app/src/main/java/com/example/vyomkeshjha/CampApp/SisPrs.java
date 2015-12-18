@@ -2,33 +2,40 @@ package com.example.vyomkeshjha.CampApp;
 
 
         import java.io.IOException;
-        import java.io.InputStream;
+        import java.lang.annotation.ElementType;
+        import java.util.HashMap;
+        import java.util.Map;
+        import java.util.Stack;
 
         import org.jsoup.Jsoup;
         import org.jsoup.nodes.Document;
-        import org.jsoup.select.Elements;
         import org.jsoup.Connection;
+        import org.jsoup.nodes.Element;
+        import org.jsoup.select.Elements;
+
         import android.os.AsyncTask;
         import android.os.Bundle;
         import android.util.Log;
         import android.app.Activity;
         import android.app.ProgressDialog;
-        import android.graphics.Bitmap;
-        import android.graphics.BitmapFactory;
         import android.view.View;
         import android.view.View.OnClickListener;
         import android.widget.Button;
-        import android.widget.ImageView;
         import android.widget.TextView;
 
         import com.example.vyomkeshjha.CampAppX.R;
 
 public class SisPrs extends Activity {
-
-    // URL Address
-
+    TextView Text;
+    static String idValue="150906009";
+    static String DOB="1998-12-15";
+    static Document academics;
+    Document NameExtractionDoc;
+    static String Name;
+    private Map<String, String> cookies = new HashMap<String, String>();
     ProgressDialog mProgressDialog;
     String Desc;
+    HTMLparser wrapper = new HTMLparser();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +45,9 @@ public class SisPrs extends Activity {
 
         Button descbutton = (Button) findViewById(R.id.descbutton);
         Button wp2 = (Button) findViewById(R.id.WpBu);
-
+   //  Temporary text view for the HTML
+        Text = (TextView)findViewById(R.id.TV);
+        // Capture button click
         wp2.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,25 +57,30 @@ public class SisPrs extends Activity {
             }
         });
 
-        // Capture button click
+
         descbutton.setOnClickListener(new OnClickListener() {
             public void onClick(View arg0) {
-                // Execute Description AsyncTask
-                new Description().execute();
+                // Execute LoginToWsis AsyncTask
+                new LoginToWsis().execute();
             }
         });
 
     }
 
-    // Description AsyncTask
-    private class Description extends AsyncTask<Void, Void, Void> {
-        String desc;
+    // LoginToWsis AsyncTask, gets the cookies stored into the hashlist
+    public static Document getAcdemics()
+    {
+        return academics;
+    }
+
+    private class LoginToWsis extends AsyncTask<Void, Void, Void> {
+
         String Cookie;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             mProgressDialog = new ProgressDialog(SisPrs.this);
-            mProgressDialog.setTitle("connector");
+            mProgressDialog.setTitle("Logging in");
             mProgressDialog.setMessage("Loading...");
             mProgressDialog.setIndeterminate(false);
             mProgressDialog.show();
@@ -77,35 +91,35 @@ public class SisPrs extends Activity {
             try {
                 // Connect to the web site
               try {
-                  Connection.Response res = Jsoup.connect("http://websismit.manipal.edu/websis/")
-                          .data("idValue", "150906009")
-                          .data("birthDate_i18n", "1998-12-15").data("birthDate", "1998-12-15")
+            // /*
+                Connection.Response res = Jsoup.connect("http://websismit.manipal.edu/websis/control/createAnonSession")
+                          .data("idValue", idValue)
+                          .data("birthDate_i18n", DOB).data("birthDate", DOB)
                           .method(Connection.Method.POST)
                   .execute();
-                  Log.v("done","connection made");
-                  Document SieP = res.parse();
+                  Log.v("done", "connection made");
+
+                  //Store All the Cookies in the hashList
+                  cookies.putAll(res.cookies());
+
+                  NameExtractionDoc=res.parse();
+                  HTMLparser.getStudentDetails(NameExtractionDoc);
+                  //Document SieP = res.parse();
                   Cookie = res.cookie("JSESSIONID");
-                  Log.d("cookie","cookie is :"+Cookie);
+                  //Log.d("cookie","cookie is :"+Cookie);
+                  //Log.i("document",SieP.body().toString());//*/
+                 //Document doc =wrapper.get("http://websismit.manipal.edu/websis/");
+                  //Log.i("document",doc.body().toString());
 
               }
-              catch (Exception e)
+              catch (IOException e)
               {
                   Log.e("error","   WebsisConnectFailed");
                   e.printStackTrace();
               }
 
-                Document sis = Jsoup.connect("http://websismit.manipal.edu/websis/control/createAnonSession").data("cookieexists", "true")
-                        .data("idValue", "150906009")
-                        .data("birthDate_i18n", "1998-12-15").data("birthDate","1998-12-15")
-                        .post();
-                Log.i("data",sis.title()+"logged");
-                Log.i("data",sis.body()+"logged");
-                Log.i("data",sis.toString()+"logged");
-                Document Details = Jsoup.connect("http://websismit.manipal.edu/websis/control/StudentAcademicProfile").get();
-                // Using Elements to get the Meta data
-               // Log.d("details",Details.body().toString());
                 Desc = Cookie;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -120,9 +134,11 @@ public class SisPrs extends Activity {
         }
     }
 
-    // WbPageGetter AsyncTask
+    // Background task to retrieve the webpage HTML
     private class GetWp extends AsyncTask<Void, Void, Void> {
         String desc;
+
+
         ProgressDialog mProgressDialogX;
         @Override
         protected void onPreExecute() {
@@ -134,21 +150,38 @@ public class SisPrs extends Activity {
             mProgressDialogX.setIndeterminate(false);
             mProgressDialogX.show();
         }
+        String Data="";
 
         @Override
         protected Void doInBackground(Void... params) {
 
+
                 // Connect to the web site
                 try {
-                    Log.e("COOK", "the cookie is " + Desc);
-                    Connection.Response getAcademics = Jsoup.connect("http://websismit.manipal.edu/websis/control/StudentAcademicProfile").cookie("JSESSIONID",Desc)
-                            .method(Connection.Method.GET)
+                    Log.e("COOKIE", "the cookie is " + Desc);
+                    Connection.Response getAcademics = Jsoup.connect("http://websismit.manipal.edu/websis/control/StudentAcademicProfile").cookies(cookies)
+                            .method(Connection.Method.POST)
                             .execute();
-                    Log.d("AcademicProfile",getAcademics.toString());
+                    academics = getAcademics.parse();
+
+                    //String Body = academics.body().toString();
+                    //String Location =academics.location();
+                    //String Title = academics.title();
+                    //String all = academics.toString();
+                    //Log.d("title",Title);
+                    //Log.d("location",Location);
+                    //Log.w("AcademicProfile",academics.toString());
+                    //Log.w("AcademicProfileBody",Body);
+                    for(int i=1;i<11;i++)
+                    {
+                        Data +=  HTMLparser.extractFromGradeTable(academics,"TermGradeBookSummary_table",i)[0]+"\n";
+                    }
+
+
                 }
                 catch (IOException e)
                 {
-                    Log.e("error","   LooksLikeNullCook");
+                    Log.e("error","Connection Failed at getWebpage");
                     e.printStackTrace();
                 }
 
@@ -161,7 +194,7 @@ public class SisPrs extends Activity {
         @Override
         protected void onPostExecute(Void result) {
             // Set description into TextView
-
+            Text.setText(Data);
             mProgressDialogX.dismiss();
         }
     }
